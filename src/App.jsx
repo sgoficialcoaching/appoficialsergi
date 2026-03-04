@@ -27,25 +27,20 @@ export default function App() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#f7fafc'
+        background: 'var(--bg-base)'
       }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{
             width: '48px',
             height: '48px',
-            border: '4px solid #e2e8f0',
-            borderTopColor: '#667eea',
+            border: '4px solid rgba(255,255,255,0.1)',
+            borderTopColor: 'var(--neon-yellow)',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto'
-          }}></div>
-          <p style={{ marginTop: '16px', color: '#718096' }}>Cargando...</p>
+          }} />
+          <p style={{ marginTop: '16px', color: 'var(--text-muted)', fontSize: '14px', fontWeight: 500 }}>Cargando...</p>
         </div>
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
       </div>
     );
   }
