@@ -1,7 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { Hop as Home, Users, Zap, ChartBar as BarChart2, ShoppingBag, Activity, Dumbbell, Apple, ArrowRight, Trophy, Calendar, Star, LogOut, Flame, ArrowLeft, Clock } from 'lucide-react';
+import CommunityScreen from './CommunityScreen';
+import BoostScreen from './BoostScreen';
+import AnalyticsScreen from './AnalyticsScreen';
+import StoreScreen from './StoreScreen';
 
 function StarField() {
   const canvasRef = useRef(null);
@@ -511,42 +515,59 @@ export default function Dashboard() {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto scrollbar-hide p-4 sm:p-5 md:p-6 lg:p-8 pb-nav-safe md:pb-8">
-
-          {/* Welcome */}
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F4F5] leading-tight">Hola, {firstName}</h2>
-              <p className="text-[#71717A] text-sm font-medium">Vamos a por todas hoy.</p>
-            </div>
-            <img
-              src={`https://ui-avatars.com/api/?name=${firstName}&background=FFD600&color=000000`}
-              alt="Avatar"
-              className="w-11 h-11 rounded-full ring-2 ring-[rgba(255,214,0,0.3)]"
-            />
-          </div>
-
-          {/* Program Banner */}
-          <ProgramBanner name="Boost Intermedio" />
-
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
-
-            {/* Left column (spans 2 on lg) */}
-            <div className="lg:col-span-2 flex flex-col gap-5">
-              <WeeklyCalendar />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <PerformanceWidget />
-                <MuscleFocusWidget />
-              </div>
-              <MilestoneWidget />
-            </div>
-
-            {/* Right sidebar */}
-            <div className="flex flex-col gap-5">
-              <QuickActionsWidget />
-              <NutritionCard />
-            </div>
-          </div>
+          <AnimatePresence mode="wait">
+            {activeNav === 'home' && (
+              <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                {/* Welcome */}
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F4F5] leading-tight">Hola, {firstName}</h2>
+                    <p className="text-[#71717A] text-sm font-medium">Vamos a por todas hoy.</p>
+                  </div>
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${firstName}&background=FFD600&color=000000`}
+                    alt="Avatar"
+                    className="w-11 h-11 rounded-full ring-2 ring-[rgba(255,214,0,0.3)]"
+                  />
+                </div>
+                <ProgramBanner name="Boost Intermedio" />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
+                  <div className="lg:col-span-2 flex flex-col gap-5">
+                    <WeeklyCalendar />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <PerformanceWidget />
+                      <MuscleFocusWidget />
+                    </div>
+                    <MilestoneWidget />
+                  </div>
+                  <div className="flex flex-col gap-5">
+                    <QuickActionsWidget />
+                    <NutritionCard />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            {activeNav === 'community' && (
+              <motion.div key="community" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                <CommunityScreen />
+              </motion.div>
+            )}
+            {activeNav === 'boost' && (
+              <motion.div key="boost" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                <BoostScreen />
+              </motion.div>
+            )}
+            {activeNav === 'analytics' && (
+              <motion.div key="analytics" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                <AnalyticsScreen />
+              </motion.div>
+            )}
+            {activeNav === 'store' && (
+              <motion.div key="store" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                <StoreScreen />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
 
