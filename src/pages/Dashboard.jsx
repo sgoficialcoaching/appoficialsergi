@@ -217,17 +217,22 @@ function MilestoneWidget() {
   );
 }
 
-function QuickActionsWidget() {
+function QuickActionsWidget({ onTrain, onFood }) {
+  const actions = [
+    { label: 'Entrenar', Icon: Dumbbell, onClick: onTrain },
+    { label: 'Comida', Icon: Apple, onClick: onFood },
+  ];
   return (
     <div className="glass-effect rounded-2xl p-6">
       <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-[#FFD600]">
         <Zap className="w-5 h-5" /> Acciones Rápidas
       </h3>
       <div className="grid grid-cols-2 gap-4">
-        {[{ label: 'Entrenar', Icon: Dumbbell }, { label: 'Comida', Icon: Apple }].map(a => (
+        {actions.map(a => (
           <motion.button
             key={a.label}
             whileTap={{ scale: 0.95 }}
+            onClick={a.onClick}
             className="p-4 rounded-xl bg-[#111113] border-none cursor-pointer flex flex-col items-center justify-center gap-2 text-[#F4F4F5] hover:text-[#FFD600] transition-colors"
             style={{ boxShadow: 'var(--shadow-light), var(--shadow-dark)' }}
           >
@@ -333,7 +338,7 @@ function NutritionCard() {
   );
 }
 
-function ProgramBanner({ name }) {
+function ProgramBanner({ name, onContinue }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -363,7 +368,10 @@ function ProgramBanner({ name }) {
         <p className="text-gray-300 max-w-xs text-xs sm:text-sm mb-4 font-medium hidden sm:block">
           Supera tus límites con el plan definitivo de hipertrofia y fuerza.
         </p>
-        <button className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold uppercase tracking-wide">
+        <button
+          onClick={onContinue}
+          className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold uppercase tracking-wide"
+        >
           Continuar
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -372,17 +380,17 @@ function ProgramBanner({ name }) {
   );
 }
 
-function WeeklyCalendar() {
+function WeeklyCalendar({ onTodayClick }) {
   const days = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+  const dates = [2, 3, 4, 5, 6, 7, 8];
   const plan = ['Push', 'Pull', 'Legs', 'Hombros', 'Full', 'Cardio', 'Rest'];
-  const today = new Date().getDay();
-  const todayIdx = today === 0 ? 6 : today - 1;
+  const todayIdx = 2;
   return (
     <div className="glass-effect rounded-2xl p-5 sm:p-6">
       <div className="flex justify-between items-center mb-5">
         <div>
           <h3 className="text-xl font-bold text-[#FFD600]">Intermedio</h3>
-          <p className="text-[11px] text-[#71717A] font-bold uppercase tracking-widest">Plan Semanal</p>
+          <p className="text-[11px] text-[#71717A] font-bold uppercase tracking-widest">Plan Semanal · Mar 2026</p>
         </div>
         <div className="flex gap-2">
           {[ArrowLeft, ArrowRight].map((Icon, i) => (
@@ -400,6 +408,7 @@ function WeeklyCalendar() {
             <motion.div
               key={day}
               whileTap={{ scale: 0.95 }}
+              onClick={() => isToday && onTodayClick && onTodayClick()}
               className="flex-shrink-0 w-[72px] sm:w-20 h-24 sm:h-28 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300"
               style={{
                 background: isToday ? '#FFD600' : '#111113',
@@ -410,7 +419,7 @@ function WeeklyCalendar() {
               }}
             >
               <p className="text-[9px] font-black tracking-widest mb-1 opacity-70">{day}</p>
-              <p className="text-2xl font-black mb-2">{i + 3}</p>
+              <p className="text-2xl font-black mb-2">{dates[i]}</p>
               {isRest
                 ? <Clock className="w-4 h-4" />
                 : <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center" style={{ borderColor: isToday ? '#000' : 'rgba(255,255,255,0.3)' }}>
@@ -429,6 +438,12 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState('home');
+  const [boostTab, setBoostTab] = useState('program');
+
+  const goToBoost = (tab = 'today') => {
+    setBoostTab(tab);
+    setActiveNav('boost');
+  };
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => { setUser(user); setLoading(false); });
@@ -530,10 +545,10 @@ export default function Dashboard() {
                     className="w-11 h-11 rounded-full ring-2 ring-[rgba(255,214,0,0.3)]"
                   />
                 </div>
-                <ProgramBanner name="Boost Intermedio" />
+                <ProgramBanner name="Boost Intermedio" onContinue={() => goToBoost('today')} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
                   <div className="lg:col-span-2 flex flex-col gap-5">
-                    <WeeklyCalendar />
+                    <WeeklyCalendar onTodayClick={() => goToBoost('today')} />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <PerformanceWidget />
                       <MuscleFocusWidget />
@@ -541,7 +556,7 @@ export default function Dashboard() {
                     <MilestoneWidget />
                   </div>
                   <div className="flex flex-col gap-5">
-                    <QuickActionsWidget />
+                    <QuickActionsWidget onTrain={() => goToBoost('today')} onFood={() => goToBoost('nutrition')} />
                     <NutritionCard />
                   </div>
                 </div>
@@ -554,7 +569,7 @@ export default function Dashboard() {
             )}
             {activeNav === 'boost' && (
               <motion.div key="boost" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <BoostScreen />
+                <BoostScreen initialTab={boostTab} />
               </motion.div>
             )}
             {activeNav === 'analytics' && (

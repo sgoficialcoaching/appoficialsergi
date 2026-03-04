@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Play, Lock, CircleCheck as CheckCircle, Clock, ChevronRight, Dumbbell, Target, Star, ArrowRight } from 'lucide-react';
+import { Zap, Play, Lock, CircleCheck as CheckCircle, Clock, ChevronRight, Dumbbell, Target, Star, ArrowRight, Apple, Flame, Droplets, Wheat } from 'lucide-react';
 
 const PROGRAMS = [
   {
@@ -101,8 +101,56 @@ function ProgramCard({ program, onStart }) {
   );
 }
 
-export default function BoostScreen() {
-  const [activeTab, setActiveTab] = useState('program');
+const MEAL_PLAN = [
+  {
+    time: '08:00',
+    name: 'Desayuno',
+    foods: ['Avena 80g', 'Claras de huevo x4', 'Plátano'],
+    kcal: 480,
+    protein: 32,
+    carbs: 68,
+    fat: 8,
+  },
+  {
+    time: '11:00',
+    name: 'Media mañana',
+    foods: ['Batido de proteína', 'Almendras 30g'],
+    kcal: 310,
+    protein: 28,
+    carbs: 14,
+    fat: 14,
+  },
+  {
+    time: '14:00',
+    name: 'Comida',
+    foods: ['Pollo 200g', 'Arroz integral 150g', 'Brócoli'],
+    kcal: 620,
+    protein: 48,
+    carbs: 72,
+    fat: 10,
+  },
+  {
+    time: '17:30',
+    name: 'Pre-entreno',
+    foods: ['Tostadas integrales x2', 'Mantequilla de cacahuete 20g'],
+    kcal: 290,
+    protein: 10,
+    carbs: 38,
+    fat: 12,
+  },
+  {
+    time: '20:30',
+    name: 'Cena',
+    foods: ['Salmón 180g', 'Boniato 200g', 'Espinacas'],
+    kcal: 540,
+    protein: 42,
+    carbs: 52,
+    fat: 14,
+  },
+];
+
+export default function BoostScreen({ initialTab = 'program' }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedDay, setSelectedDay] = useState(3);
 
   return (
@@ -144,7 +192,8 @@ export default function BoostScreen() {
       <div className="flex gap-2 bg-[#111113] p-1 rounded-xl">
         {[
           { id: 'program', label: 'Programa' },
-          { id: 'today', label: 'Hoy' },
+          { id: 'today', label: 'Entrenamiento' },
+          { id: 'nutrition', label: 'Nutrición' },
           { id: 'plans', label: 'Planes' },
         ].map(t => (
           <button
@@ -249,6 +298,63 @@ export default function BoostScreen() {
                   </div>
                 ))}
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'nutrition' && (
+          <motion.div key="nutrition" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
+            <div className="glass-effect rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-1">
+                <Apple className="w-4 h-4 text-[#FFD600]" />
+                <h3 className="font-bold text-[#F4F4F5]">Plan Nutricional · Boost Intermedio</h3>
+              </div>
+              <p className="text-[11px] text-[#71717A] mb-4">Adaptado a tu objetivo de hipertrofia.</p>
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                {[
+                  { label: 'Kcal', value: '2.240', color: '#FFD600', Icon: Flame },
+                  { label: 'Proteína', value: '160g', color: '#22d3ee', Icon: Dumbbell },
+                  { label: 'Carbos', value: '244g', color: '#f59e0b', Icon: Wheat },
+                  { label: 'Grasas', value: '58g', color: '#f97316', Icon: Droplets },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl p-3 flex flex-col items-center gap-1" style={{ background: `${m.color}10`, border: `1px solid ${m.color}20` }}>
+                    <m.Icon className="w-3.5 h-3.5" style={{ color: m.color }} />
+                    <p className="text-sm font-black text-white">{m.value}</p>
+                    <p className="text-[9px] font-bold text-[#71717A] uppercase tracking-wide">{m.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              {MEAL_PLAN.map((meal, i) => (
+                <motion.div
+                  key={meal.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="glass-effect rounded-2xl p-4"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black text-[#FFD600] bg-[rgba(255,214,0,0.1)] px-2 py-0.5 rounded-full">{meal.time}</span>
+                        <h4 className="text-sm font-bold text-[#F4F4F5]">{meal.name}</h4>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {meal.foods.map(f => (
+                          <span key={f} className="text-[10px] text-[#71717A] bg-[#111113] px-2 py-0.5 rounded-full">{f}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-sm font-black text-white flex-shrink-0 ml-2">{meal.kcal} kcal</span>
+                  </div>
+                  <div className="flex gap-3 text-[10px] font-bold mt-2 pt-2 border-t border-white/5">
+                    <span className="text-[#22d3ee]">P: {meal.protein}g</span>
+                    <span className="text-[#f59e0b]">C: {meal.carbs}g</span>
+                    <span className="text-[#f97316]">G: {meal.fat}g</span>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         )}
