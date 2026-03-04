@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Activity, Dumbbell, Flame, Calendar, ChevronUp, ChevronDown, BarChart2 } from 'lucide-react';
+import { TrendingUp, Activity, Dumbbell, Flame, Calendar, ChevronUp, ChevronDown, ChartBar as BarChart2 } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const VOLUME_DATA = [

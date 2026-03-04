@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Star, ShoppingCart, Check, Search, Filter, Zap, Package } from 'lucide-react';
+import { ShoppingBag, Star, ShoppingCart, Check, Search, ListFilter as Filter, Zap, Package } from 'lucide-react';
 
 const PRODUCTS = [
   {

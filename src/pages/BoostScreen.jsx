@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Play, Lock, CheckCircle, Clock, ChevronRight, Dumbbell, Target, Star, ArrowRight } from 'lucide-react';
+import { Zap, Play, Lock, CircleCheck as CheckCircle, Clock, ChevronRight, Dumbbell, Target, Star, ArrowRight } from 'lucide-react';
 
 const PROGRAMS = [
   {
