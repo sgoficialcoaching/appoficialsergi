@@ -15,23 +15,14 @@ export default function Auth() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       if (isLogin) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) throw signInError;
+        const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+        if (err) throw err;
       } else {
-        if (!fullName) {
-          setError('Por favor, completa todos los campos.');
-          setLoading(false);
-          return;
-        }
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { full_name: fullName, avatar_url: '' } }
-        });
-        if (signUpError) throw signUpError;
+        if (!fullName.trim()) { setError('Por favor, completa todos los campos.'); setLoading(false); return; }
+        const { error: err } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName, avatar_url: '' } } });
+        if (err) throw err;
       }
     } catch (err) {
       setError(err.message || 'Error en la autenticación');
@@ -40,222 +31,91 @@ export default function Auth() {
     }
   };
 
-  const handleDemoSocial = (provider) => {
-    setError(`El inicio de sesión con ${provider} está simulado en este entorno. Usa email/password.`);
-  };
+  const inputClass = "w-full pl-12 pr-4 py-3.5 bg-[#0A0A0C] border border-white/8 rounded-xl text-[#F4F4F5] text-sm outline-none transition-colors placeholder:text-[#71717A] focus:border-[#FFD600]";
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px',
-        position: 'relative',
-        overflow: 'hidden',
-        background: 'var(--bg-base)'
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: "url(\"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNkYmE5NzQiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDEwYzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0xMCAwYzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00eiIvPjwvZz48L2c+PC9zdmc+\")"
-        }}
-      />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+      {/* Background glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full opacity-10 pointer-events-none" style={{ background: '#FFD600', filter: 'blur(120px)' }} />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{ width: '100%', maxWidth: '448px', position: 'relative', zIndex: 10 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-md relative z-10"
       >
-        <div className="glass-effect" style={{ borderRadius: '24px', padding: '32px', boxShadow: '0 25px 50px rgba(0,0,0,0.5), 0 0 40px rgba(255,214,0,0.05)' }}>
+        <div className="glass-effect rounded-3xl p-7 sm:p-8" style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,214,0,0.04)' }}>
 
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          {/* Logo */}
+          <div className="text-center mb-8">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200 }}
-              style={{
-                width: '80px',
-                height: '80px',
-                margin: '0 auto 16px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--neon-yellow) 0%, #FFA500 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
+              className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #FFD600 0%, #FFA500 100%)', boxShadow: '0 0 30px rgba(255,214,0,0.3)' }}
             >
-              <span style={{ fontSize: '28px', fontWeight: 900, color: '#000' }}>SC</span>
+              <span className="text-3xl font-black text-black">SC</span>
             </motion.div>
-            <h1 className="gradient-text" style={{ fontSize: '28px', fontWeight: 900, marginBottom: '6px' }}>
-              Sergi Constance App
-            </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600 }}>
-              Conviértete en Leyenda
-            </p>
+            <h1 className="gradient-text text-2xl sm:text-3xl font-black mb-1">Sergi Constance App</h1>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717A]">Conviértete en Leyenda</p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-            <button
-              onClick={() => handleDemoSocial('Google')}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '12px',
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'var(--text-main)',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/>
-                <line x1="21.17" y1="8" x2="12" y2="8" stroke="currentColor" strokeWidth="2"/>
-                <line x1="3.95" y1="6.06" x2="8.54" y2="14" stroke="currentColor" strokeWidth="2"/>
-                <line x1="10.88" y1="21.94" x2="15.46" y2="14" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-              Continuar con Google (Demo)
-            </button>
-            <button
-              onClick={() => handleDemoSocial('Apple')}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '12px',
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'var(--text-main)',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/>
-                <path d="M10 2c1 .5 2 2 2 5"/>
-              </svg>
-              Continuar con Apple (Demo)
-            </button>
+          {/* Social Buttons */}
+          <div className="flex flex-col gap-3 mb-6">
+            {[
+              { label: 'Continuar con Google', icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+              )},
+              { label: 'Continuar con Apple', icon: (
+                <svg width="18" height="18" viewBox="0 0 814 1000" fill="currentColor">
+                  <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 376.8 0 277.6 0 183.7c0-104.9 76.7-214.3 158.3-290.5C228.2 42.6 304.3 0 381.2 0s118.3 58.1 155.4 58.1c35.9 0 116.6-62.4 197.4-62.4 30.5 0 116.6 14.4 177.1 81.7zM547.6 123.8c-11.3 40.4-33.2 61.6-33.2 61.6s-49.3-11.3-92-11.3c-52.3 0-123.1 35.9-148.4 120.8-20.2 66.9-11.3 156.6 35.9 236.2 47.2 79.6 113.6 131.7 162.5 131.7 35.9 0 55.7-18 105-18 40.4 0 58.1 18 100.5 18 60.5 0 108.9-43 141.9-99.5-64.2-31.8-120.2-103.7-120.2-211.7 0-95.8 46.3-167.9 107.2-215.8-46.3-62.1-117-92-183.2-92-31.8 0-76 13.6-76 79.8z"/>
+                </svg>
+              )},
+            ].map(btn => (
+              <button
+                key={btn.label}
+                onClick={() => setError('El inicio de sesión social está simulado. Usa email/contraseña.')}
+                className="w-full py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 text-sm font-semibold text-[#F4F4F5] transition-all border border-white/10 hover:border-white/20 hover:bg-white/5 cursor-pointer"
+                style={{ background: 'transparent' }}
+              >
+                {btn.icon}
+                {btn.label} <span className="text-[#71717A] text-xs">(Demo)</span>
+              </button>
+            ))}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-            <span style={{ margin: '0 16px', fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.1em' }}>O</span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+          {/* Divider */}
+          <div className="flex items-center mb-6">
+            <div className="flex-1 h-px bg-white/8" />
+            <span className="mx-4 text-[11px] uppercase font-bold tracking-widest text-[#71717A]">O continúa con email</span>
+            <div className="flex-1 h-px bg-white/8" />
           </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {!isLogin && (
-              <div style={{ position: 'relative' }}>
-                <User style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: 'var(--text-muted)' }} />
-                <input
-                  type="text"
-                  placeholder="Nombre Completo"
-                  value={fullName}
-                  onChange={e => setFullName(e.target.value)}
-                  style={{
-                    width: '100%',
-                    paddingLeft: '48px',
-                    paddingRight: '16px',
-                    paddingTop: '13px',
-                    paddingBottom: '13px',
-                    background: 'hsl(var(--input))',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px',
-                    color: 'var(--text-main)',
-                    fontSize: '14px',
-                    outline: 'none',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={e => e.target.style.borderColor = 'var(--neon-yellow)'}
-                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-                />
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A] pointer-events-none" />
+                <input type="text" placeholder="Nombre Completo" value={fullName} onChange={e => setFullName(e.target.value)} className={inputClass} style={{ border: '1px solid rgba(255,255,255,0.08)' }} />
               </div>
             )}
-
-            <div style={{ position: 'relative' }}>
-              <Mail style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: 'var(--text-muted)' }} />
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  paddingLeft: '48px',
-                  paddingRight: '16px',
-                  paddingTop: '13px',
-                  paddingBottom: '13px',
-                  background: 'hsl(var(--input))',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '12px',
-                  color: 'var(--text-main)',
-                  fontSize: '14px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={e => e.target.style.borderColor = 'var(--neon-yellow)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-              />
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A] pointer-events-none" />
+              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required className={inputClass} style={{ border: '1px solid rgba(255,255,255,0.08)' }} />
             </div>
-
-            <div style={{ position: 'relative' }}>
-              <Lock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: 'var(--text-muted)' }} />
-              <input
-                type="password"
-                placeholder="Contraseña"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  paddingLeft: '48px',
-                  paddingRight: '16px',
-                  paddingTop: '13px',
-                  paddingBottom: '13px',
-                  background: 'hsl(var(--input))',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '12px',
-                  color: 'var(--text-main)',
-                  fontSize: '14px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={e => e.target.style.borderColor = 'var(--neon-yellow)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-              />
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A] pointer-events-none" />
+              <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required className={inputClass} style={{ border: '1px solid rgba(255,255,255,0.08)' }} />
             </div>
 
             {error && (
-              <div style={{
-                padding: '12px',
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: '10px',
-                color: '#f87171',
-                fontSize: '13px'
-              }}>
+              <div className="p-3 rounded-xl text-red-400 text-xs font-medium border border-red-500/25" style={{ background: 'rgba(239,68,68,0.08)' }}>
                 {error}
               </div>
             )}
@@ -263,37 +123,22 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary"
-              style={{
-                width: '100%',
-                padding: '15px',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: 700,
-                opacity: loading ? 0.7 : 1,
-                cursor: loading ? 'not-allowed' : 'pointer'
-              }}
+              className="btn-primary w-full py-4 rounded-xl text-base font-bold uppercase tracking-wide"
+              style={{ opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
             >
               {loading ? 'Cargando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
             </button>
           </form>
 
-          <div style={{ marginTop: '24px', textAlign: 'center' }}>
+          <div className="mt-6 text-center">
             <button
-              type="button"
               onClick={() => { setIsLogin(!isLogin); setError(''); }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'rgba(255,214,0,0.7)',
-                fontSize: '13px',
-                cursor: 'pointer',
-                transition: 'color 0.2s'
-              }}
-              onMouseEnter={e => e.target.style.color = 'var(--neon-yellow)'}
-              onMouseLeave={e => e.target.style.color = 'rgba(255,214,0,0.7)'}
+              className="text-sm text-[rgba(255,214,0,0.65)] hover:text-[#FFD600] transition-colors cursor-pointer border-none bg-transparent font-medium"
             >
-              {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+              {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
+              <span className="font-bold underline underline-offset-2">
+                {isLogin ? 'Regístrate gratis' : 'Inicia sesión'}
+              </span>
             </button>
           </div>
         </div>
