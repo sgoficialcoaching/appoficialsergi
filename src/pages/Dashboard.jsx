@@ -21,7 +21,7 @@ export default function Dashboard() {
           .from('profiles')
           .select('*')
           .eq('id', currentUser.id)
-          .single();
+          .maybeSingle();
 
         setProfile(profileData);
       }
