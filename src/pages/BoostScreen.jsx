@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Play, Lock, CircleCheck as CheckCircle, Clock, ChevronRight, Dumbbell, Target, Star, ArrowRight, Apple, Flame, Droplets, Wheat } from 'lucide-react';
+import { Zap, Play, Lock, CircleCheck as CheckCircle, Clock, ChevronRight, Dumbbell, Target, Star, ArrowRight, Apple, Flame, Droplets, Wheat, ArrowLeft, ChevronUp, ChevronDown, X, Trophy } from 'lucide-react';
 
 const PROGRAMS = [
   {
@@ -149,9 +149,231 @@ const MEAL_PLAN = [
   },
 ];
 
+function WorkoutSession({ onFinish }) {
+  const [currentExercise, setCurrentExercise] = useState(0);
+  const [sets, setSets] = useState(EXERCISES.map(() => []));
+  const [reps, setReps] = useState('10');
+  const [weight, setWeight] = useState('');
+  const [elapsed, setElapsed] = useState(0);
+  const [resting, setResting] = useState(false);
+  const [restSeconds, setRestSeconds] = useState(0);
+
+  useState(() => {
+    const t = setInterval(() => setElapsed(s => s + 1), 1000);
+    return () => clearInterval(t);
+  });
+
+  const fmtTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  const ex = EXERCISES[currentExercise];
+  const completedSets = sets[currentExercise];
+  const targetSets = parseInt(ex.sets.split('x')[0]);
+
+  const logSet = () => {
+    if (!weight) return;
+    const newSets = sets.map((s, i) => i === currentExercise ? [...s, { reps, weight }] : s);
+    setSets(newSets);
+    setResting(true);
+    const restTime = ex.rest.includes('2') ? 120 : ex.rest.includes('90') ? 90 : 60;
+    setRestSeconds(restTime);
+    const t = setInterval(() => {
+      setRestSeconds(prev => {
+        if (prev <= 1) { clearInterval(t); setResting(false); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const totalCompleted = sets.reduce((acc, s) => acc + s.length, 0);
+  const totalSets = EXERCISES.reduce((acc, e) => acc + parseInt(e.sets.split('x')[0]), 0);
+  const progress = totalSets > 0 ? (totalCompleted / totalSets) * 100 : 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col gap-4"
+    >
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onFinish}
+          className="flex items-center gap-2 text-[#71717A] hover:text-[#F4F4F5] transition-colors border-none bg-transparent cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm font-bold">Volver</span>
+        </button>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#111113]">
+          <Clock className="w-3.5 h-3.5 text-[#FFD600]" />
+          <span className="text-sm font-black text-[#FFD600]">{fmtTime(elapsed)}</span>
+        </div>
+      </div>
+
+      <div className="glass-effect rounded-2xl p-5">
+        <div className="flex justify-between items-center mb-3">
+          <div>
+            <h2 className="text-xl font-black text-white">Push B</h2>
+            <p className="text-[11px] text-[#71717A]">Pecho · Tríceps · Hombros</p>
+          </div>
+          <span className="text-xs font-black text-[#FFD600]">{Math.round(progress)}%</span>
+        </div>
+        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+          <motion.div
+            className="h-2 rounded-full"
+            style={{ background: 'linear-gradient(90deg, #FFD600, #FFA500)' }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.4 }}
+          />
+        </div>
+        <p className="text-[11px] text-[#71717A] mt-2">{totalCompleted} / {totalSets} series completadas</p>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        {EXERCISES.map((e, i) => {
+          const done = sets[i].length >= parseInt(e.sets.split('x')[0]);
+          return (
+            <button
+              key={e.name}
+              onClick={() => setCurrentExercise(i)}
+              className="flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wide border-none cursor-pointer transition-all"
+              style={{
+                background: i === currentExercise ? '#FFD600' : done ? 'rgba(34,197,94,0.15)' : '#111113',
+                color: i === currentExercise ? '#000' : done ? '#22c55e' : '#71717A',
+                border: done && i !== currentExercise ? '1px solid rgba(34,197,94,0.3)' : '1px solid transparent',
+              }}
+            >
+              {i + 1}. {e.name.split(' ')[0]}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="glass-effect rounded-2xl overflow-hidden">
+        <div className="relative h-32">
+          <img src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=600" alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.92), rgba(0,0,0,0.5))' }} />
+          <div className="absolute inset-0 p-5 flex flex-col justify-center">
+            <span className="text-[10px] font-black text-[#FFD600] uppercase tracking-widest mb-1">Ejercicio {currentExercise + 1} de {EXERCISES.length}</span>
+            <h3 className="text-xl font-black text-white leading-tight">{ex.name}</h3>
+            <div className="flex items-center gap-3 mt-1">
+              <span className="text-xs text-gray-300 flex items-center gap-1"><Dumbbell className="w-3 h-3" />{ex.sets}</span>
+              <span className="text-xs text-gray-300 flex items-center gap-1"><Clock className="w-3 h-3" />{ex.rest} descanso</span>
+              <span className="text-xs text-[#FFD600] font-bold">PR: {ex.pr}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-5">
+          {resting ? (
+            <div className="flex flex-col items-center py-4 gap-2">
+              <p className="text-[11px] font-black text-[#71717A] uppercase tracking-widest">Descansando</p>
+              <p className="text-5xl font-black text-[#FFD600]">{fmtTime(restSeconds)}</p>
+              <button
+                onClick={() => setResting(false)}
+                className="mt-2 px-4 py-2 rounded-xl text-xs font-bold text-[#71717A] border border-white/10 bg-transparent cursor-pointer hover:text-white transition-colors"
+              >
+                Saltar descanso
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <p className="text-[10px] font-bold text-[#71717A] uppercase tracking-wide mb-1.5">Repeticiones</p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setReps(r => String(Math.max(1, parseInt(r) - 1)))} className="w-8 h-8 rounded-lg bg-[#111113] flex items-center justify-center border-none cursor-pointer text-white hover:text-[#FFD600] transition-colors">
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    <span className="text-2xl font-black text-white w-8 text-center">{reps}</span>
+                    <button onClick={() => setReps(r => String(parseInt(r) + 1))} className="w-8 h-8 rounded-lg bg-[#111113] flex items-center justify-center border-none cursor-pointer text-white hover:text-[#FFD600] transition-colors">
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-[#71717A] uppercase tracking-wide mb-1.5">Peso (kg)</p>
+                  <input
+                    type="number"
+                    value={weight}
+                    onChange={e => setWeight(e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-[#111113] border border-white/10 rounded-lg px-3 py-2 text-lg font-black text-white text-center focus:outline-none focus:border-[#FFD600] transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 mb-4">
+                {Array.from({ length: targetSets }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 h-2 rounded-full transition-all"
+                    style={{ background: i < completedSets.length ? '#FFD600' : 'rgba(255,255,255,0.1)' }}
+                  />
+                ))}
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={logSet}
+                disabled={!weight}
+                className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-wide border-none cursor-pointer transition-all"
+                style={{
+                  background: weight ? '#FFD600' : 'rgba(255,255,255,0.05)',
+                  color: weight ? '#000' : '#71717A',
+                  cursor: weight ? 'pointer' : 'not-allowed',
+                }}
+              >
+                {completedSets.length < targetSets ? `Registrar serie ${completedSets.length + 1}/${targetSets}` : 'Serie extra'}
+              </motion.button>
+
+              {completedSets.length > 0 && (
+                <div className="mt-3 flex flex-col gap-1.5">
+                  <p className="text-[10px] font-bold text-[#71717A] uppercase tracking-wide">Series registradas</p>
+                  {completedSets.map((s, i) => (
+                    <div key={i} className="flex items-center gap-3 text-xs text-[#F4F4F5]">
+                      <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+                      <span>Serie {i + 1}</span>
+                      <span className="font-bold">{s.weight}kg × {s.reps} reps</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {currentExercise < EXERCISES.length - 1 && (
+        <button
+          onClick={() => setCurrentExercise(i => i + 1)}
+          className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-[#71717A] border border-white/10 bg-transparent cursor-pointer hover:text-white transition-colors"
+        >
+          Siguiente ejercicio <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
+
+      {progress >= 100 && (
+        <motion.button
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={onFinish}
+          className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-wide border-none cursor-pointer flex items-center justify-center gap-2"
+          style={{ background: 'linear-gradient(90deg, #22c55e, #16a34a)', color: '#fff' }}
+        >
+          <Trophy className="w-4 h-4" /> Finalizar sesión
+        </motion.button>
+      )}
+    </motion.div>
+  );
+}
+
 export default function BoostScreen({ initialTab = 'program' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedDay, setSelectedDay] = useState(3);
+  const [sessionActive, setSessionActive] = useState(false);
+
+  if (sessionActive) {
+    return <WorkoutSession onFinish={() => setSessionActive(false)} />;
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -268,6 +490,7 @@ export default function BoostScreen({ initialTab = 'program' }) {
               <div className="absolute bottom-4 right-4 flex gap-2">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => setSessionActive(true)}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-black text-xs font-black uppercase cursor-pointer border-none"
                   style={{ background: '#FFD600' }}
                 >
