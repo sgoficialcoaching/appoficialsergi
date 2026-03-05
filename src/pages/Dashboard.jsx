@@ -6,6 +6,7 @@ import CommunityScreen from './CommunityScreen';
 import BoostScreen from './BoostScreen';
 import AnalyticsScreen from './AnalyticsScreen';
 import StoreScreen from './StoreScreen';
+import BoostChallengeModal from './BoostChallengeModal';
 
 function StarField() {
   const canvasRef = useRef(null);
@@ -247,14 +248,15 @@ function QuickActionsWidget({ onTrain, onFood }) {
   );
 }
 
-function NutritionCard() {
+function NutritionCard({ macroTargets }) {
+  const t = macroTargets || { calories: 2200, protein: 160, carbs: 240, fat: 65 };
   const macros = [
-    { label: 'Proteínas', value: 0, target: 200, color: '#22d3ee', bg: 'rgba(34,211,238,0.08)' },
-    { label: 'Carbos', value: 0, target: 300, color: '#d946ef', bg: 'rgba(217,70,239,0.08)' },
-    { label: 'Grasas', value: 0, target: 80, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
+    { label: 'Proteínas', value: 0, target: t.protein, color: '#22d3ee', bg: 'rgba(34,211,238,0.08)' },
+    { label: 'Carbos', value: 0, target: t.carbs, color: '#d946ef', bg: 'rgba(217,70,239,0.08)' },
+    { label: 'Grasas', value: 0, target: t.fat, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
   ];
-  const kcal = 0, kcalTarget = 2500;
-  const kcalPct = (kcal / kcalTarget) * 100;
+  const kcal = 0, kcalTarget = t.calories;
+  const kcalPct = 0;
   const r = 28, circ = 2 * Math.PI * r;
   return (
     <div className="rounded-3xl border border-white/5 p-6 relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #1E1F22 0%, #121315 100%)', boxShadow: '0 25px 50px rgba(0,0,0,0.3)' }}>
@@ -338,6 +340,64 @@ function NutritionCard() {
   );
 }
 
+const GOAL_PROGRAM_MAP = {
+  lose_fat: { name: 'Boost Cut', desc: 'Quema grasa y mantén tu músculo con intensidad progresiva.' },
+  gain_muscle: { name: 'Boost Hypertrophy', desc: 'Construye músculo real con volumen y fuerza progresiva.' },
+  recomp: { name: 'Boost Recomp', desc: 'Transforma tu composición. Músculo arriba, grasa abajo.' },
+  endurance: { name: 'Boost Cardio', desc: 'Mejora tu capacidad cardiovascular y aguante.' },
+};
+
+function BoostChallengeActiveWidget({ profile, onGoToBoost }) {
+  const start = profile?.boost_challenge_start ? new Date(profile.boost_challenge_start) : new Date();
+  const daysElapsed = Math.max(0, Math.floor((new Date() - start) / (1000 * 60 * 60 * 24)));
+  const pct = Math.min((daysElapsed / 90) * 100, 100);
+  const prog = GOAL_PROGRAM_MAP[profile?.goal] || { name: 'Boost Challenge', desc: 'Tu transformación de 90 días.' };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative w-full rounded-3xl overflow-hidden mb-6 md:mb-8"
+      style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+      <img
+        src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800"
+        alt="Reto Boost"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.4) 100%)' }} />
+      <div className="relative z-10 p-5 sm:p-7">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+            style={{ background: '#FFD600', boxShadow: '0 0 12px rgba(255,214,0,0.5)' }}>
+            <Zap className="w-3 h-3 text-black" fill="black" />
+            <span className="text-[10px] font-black text-black uppercase tracking-widest">Reto Activo</span>
+          </div>
+          <span className="text-[10px] font-bold text-white/50">Día {daysElapsed} de 90</span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-white uppercase italic leading-none mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          {prog.name}
+        </h2>
+        <p className="text-white/60 text-xs sm:text-sm mb-4 max-w-sm">{prog.desc}</p>
+        <div className="mb-4 max-w-sm">
+          <div className="flex justify-between text-[10px] font-bold text-white/50 mb-1.5">
+            <span>Progreso del reto</span>
+            <span className="text-[#FFD600]">{Math.round(pct)}% · {90 - daysElapsed} días restantes</span>
+          </div>
+          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+            <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #FFD600, #FFA500)' }}
+              initial={{ width: 0 }} animate={{ width: `${Math.max(pct, daysElapsed > 0 ? 1.5 : 0)}%` }}
+              transition={{ duration: 1 }} />
+          </div>
+        </div>
+        <button onClick={onGoToBoost}
+          className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wide border-none cursor-pointer">
+          Continuar sesión <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 function ProgramBanner({ onStart }) {
   return (
     <motion.div
@@ -345,7 +405,6 @@ function ProgramBanner({ onStart }) {
       animate={{ opacity: 1, y: 0 }}
       className="relative w-full h-48 sm:h-56 md:h-64 rounded-3xl overflow-hidden cursor-pointer mb-6 md:mb-8 group"
       style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
-      onClick={onStart}
     >
       <img
         src="https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg?auto=compress&cs=tinysrgb&w=800"
@@ -358,23 +417,20 @@ function ProgramBanner({ onStart }) {
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-black text-[10px] font-black px-3 py-1 rounded-full mb-3 uppercase tracking-widest"
-          style={{ background: '#FFD600', boxShadow: '0 0 15px rgba(255,214,0,0.6)' }}
-        >
-          Reto 90 Dias
+          className="text-black text-[10px] font-black px-3 py-1 rounded-full mb-3 uppercase tracking-widest flex items-center gap-1.5"
+          style={{ background: '#FFD600', boxShadow: '0 0 15px rgba(255,214,0,0.6)' }}>
+          <Trophy className="w-3 h-3" /> Reto · 90 Días
         </motion.div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase leading-none mb-2 italic drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
           Boost Challenge
         </h2>
-        <p className="text-gray-300 max-w-xs text-xs sm:text-sm mb-4 font-medium hidden sm:block">
-          Transforma tu cuerpo en 3 meses. Empieza hoy.
+        <p className="text-gray-300 max-w-xs text-xs sm:text-sm mb-5 font-medium">
+          Transforma tu cuerpo en 3 meses. Personalizado para ti.
         </p>
-        <button
-          onClick={onStart}
-          className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold uppercase tracking-wide"
-        >
-          Unirse al Reto
-          <ArrowRight className="w-4 h-4" />
+        <button onClick={onStart}
+          className="btn-primary flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wide border-none cursor-pointer"
+          style={{ background: '#FFD600', color: '#000', boxShadow: '0 0 20px rgba(255,214,0,0.4)' }}>
+          <Zap className="w-4 h-4" fill="black" /> Unirse al Reto
         </button>
       </div>
     </motion.div>
@@ -454,13 +510,33 @@ function WeeklyCalendar({ onTodayClick }) {
   );
 }
 
-export default function Dashboard() {
+function calcProfileMacros(p) {
+  if (!p?.weight_kg) return null;
+  const actMults = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9 };
+  const mult = actMults[p.activity_level] || 1.55;
+  const bmr = p.gender === 'female'
+    ? 10 * p.weight_kg + 6.25 * p.height_cm - 5 * p.age - 161
+    : 10 * p.weight_kg + 6.25 * p.height_cm - 5 * p.age + 5;
+  let calories = Math.round(bmr * mult);
+  if (p.goal === 'lose_fat') calories -= 400;
+  if (p.goal === 'gain_muscle') calories += 250;
+  const protein = Math.round(p.weight_kg * 2.0);
+  const fat = Math.round((calories * 0.25) / 9);
+  const carbs = Math.round((calories - protein * 4 - fat * 9) / 4);
+  return { calories, protein, carbs, fat };
+}
+
+export default function Dashboard({ profile: initialProfile, onProfileUpdate }) {
+  const [profile, setProfile] = useState(initialProfile || null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState('home');
   const [boostTab, setBoostTab] = useState('program');
   const [sessionActive, setSessionActive] = useState(false);
   const [sessionElapsed, setSessionElapsed] = useState(0);
+  const [showChallengeModal, setShowChallengeModal] = useState(false);
+
+  const challengeActive = !!profile?.boost_challenge_active;
 
   const goToBoost = (tab = 'today') => {
     setBoostTab(tab);
@@ -483,8 +559,18 @@ export default function Dashboard() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleChallengeComplete = (updatedProfile) => {
+    const merged = { ...profile, ...updatedProfile };
+    setProfile(merged);
+    if (onProfileUpdate) onProfileUpdate(merged);
+    setShowChallengeModal(false);
+    setActiveNav('boost');
+    setBoostTab('program');
+  };
+
   const handleSignOut = async () => await supabase.auth.signOut();
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'Campeón';
+  const firstName = profile?.full_name?.split(' ')[0] || user?.user_metadata?.full_name?.split(' ')[0] || 'Campeón';
+  const macroTargets = calcProfileMacros(profile);
 
   if (loading) {
     return (
@@ -563,11 +649,12 @@ export default function Dashboard() {
           <AnimatePresence mode="wait">
             {activeNav === 'home' && (
               <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                {/* Welcome */}
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F4F5] leading-tight">Hola, {firstName}</h2>
-                    <p className="text-[#71717A] text-sm font-medium">Vamos a por todas hoy.</p>
+                    <p className="text-[#71717A] text-sm font-medium">
+                      {challengeActive ? `Día ${Math.max(0, Math.floor((new Date() - new Date(profile.boost_challenge_start)) / 86400000))} del reto. ¡Sigue así!` : 'Vamos a por todas hoy.'}
+                    </p>
                   </div>
                   <img
                     src={`https://ui-avatars.com/api/?name=${firstName}&background=FFD600&color=000000`}
@@ -575,7 +662,10 @@ export default function Dashboard() {
                     className="w-11 h-11 rounded-full ring-2 ring-[rgba(255,214,0,0.3)]"
                   />
                 </div>
-                <ProgramBanner onStart={() => { setActiveNav('boost'); setBoostTab('reto'); }} />
+                {challengeActive
+                  ? <BoostChallengeActiveWidget profile={profile} onGoToBoost={() => goToBoost('today')} />
+                  : <ProgramBanner onStart={() => setShowChallengeModal(true)} />
+                }
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
                   <div className="lg:col-span-2 flex flex-col gap-5">
                     <WeeklyCalendar onTodayClick={() => goToBoost('today')} />
@@ -587,7 +677,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex flex-col gap-5">
                     <QuickActionsWidget onTrain={() => goToBoost('today')} onFood={() => goToBoost('nutrition')} />
-                    <NutritionCard />
+                    <NutritionCard macroTargets={macroTargets} />
                   </div>
                 </div>
               </motion.div>
@@ -599,7 +689,15 @@ export default function Dashboard() {
             )}
             {activeNav === 'boost' && (
               <motion.div key="boost" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <BoostScreen initialTab={boostTab} sessionActive={sessionActive} onSessionStart={() => setSessionActive(true)} onSessionEnd={() => setSessionActive(false)} />
+                <BoostScreen
+                  initialTab={boostTab}
+                  sessionActive={sessionActive}
+                  onSessionStart={() => setSessionActive(true)}
+                  onSessionEnd={() => setSessionActive(false)}
+                  profile={profile}
+                  challengeActive={challengeActive}
+                  onStartChallenge={() => setShowChallengeModal(true)}
+                />
               </motion.div>
             )}
             {activeNav === 'analytics' && (
@@ -675,6 +773,17 @@ export default function Dashboard() {
           ))}
         </div>
       </motion.nav>
+
+      <AnimatePresence>
+        {showChallengeModal && user && (
+          <BoostChallengeModal
+            userId={user.id}
+            existingProfile={profile}
+            onClose={() => setShowChallengeModal(false)}
+            onComplete={handleChallengeComplete}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

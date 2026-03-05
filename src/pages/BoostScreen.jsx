@@ -415,7 +415,12 @@ function WorkoutSession({ onFinish, onExit }) {
   );
 }
 
-export default function BoostScreen({ initialTab = 'program', sessionActive = false, onSessionStart, onSessionEnd }) {
+const GOAL_NAMES = {
+  lose_fat: 'Boost Cut', gain_muscle: 'Boost Hypertrophy',
+  recomp: 'Boost Recomp', endurance: 'Boost Cardio',
+};
+
+export default function BoostScreen({ initialTab = 'program', sessionActive = false, onSessionStart, onSessionEnd, profile, challengeActive, onStartChallenge }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedDay, setSelectedDay] = useState(3);
   const [lockedToast, setLockedToast] = useState(false);
@@ -433,38 +438,58 @@ export default function BoostScreen({ initialTab = 'program', sessionActive = fa
     return <WorkoutSession onFinish={onSessionEnd} onExit={onSessionEnd} />;
   }
 
+  const expLabels = { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' };
+  const totalWeeks = profile?.training_experience === 'beginner' ? 8 : profile?.training_experience === 'advanced' ? 12 : 10;
+  const totalSessions = (profile?.training_days_per_week || 4) * totalWeeks;
+  const challengeDays = challengeActive && profile?.boost_challenge_start
+    ? Math.max(0, Math.floor((new Date() - new Date(profile.boost_challenge_start)) / 86400000))
+    : 0;
+  const programName = GOAL_NAMES[profile?.goal] || 'Boost Intermedio';
+
   return (
     <div className="flex flex-col gap-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F4F5]">Boost</h2>
-          <p className="text-[#71717A] text-sm">Tus programas de entrenamiento.</p>
+          <p className="text-[#71717A] text-sm">
+            {challengeActive ? `${programName} · Día ${challengeDays}/90` : 'Tu plan de entrenamiento.'}
+          </p>
         </div>
-        <div className="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wide text-[#71717A]"
-          style={{ background: '#111113' }}>
-          Sem 0/12
-        </div>
+        {challengeActive ? (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+            style={{ background: 'rgba(255,214,0,0.1)', border: '1px solid rgba(255,214,0,0.3)' }}>
+            <Zap className="w-3 h-3 text-[#FFD600]" fill="#FFD600" />
+            <span className="text-xs font-black text-[#FFD600] uppercase tracking-wide">Reto Activo</span>
+          </div>
+        ) : (
+          <div className="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wide text-[#71717A]"
+            style={{ background: '#111113' }}>
+            Sem 1/{totalWeeks}
+          </div>
+        )}
       </div>
 
       {/* Progress bar overall */}
       <div className="glass-effect rounded-2xl p-4">
         <div className="flex justify-between text-xs font-bold mb-2">
-          <span className="text-[#71717A]">Progreso general</span>
-          <span className="text-[#71717A]">0%</span>
+          <span className="text-[#71717A]">{challengeActive ? 'Progreso del reto 90 días' : 'Progreso del programa'}</span>
+          <span className={challengeActive ? 'text-[#FFD600]' : 'text-[#71717A]'}>
+            {challengeActive ? `${Math.round((challengeDays / 90) * 100)}%` : '0%'}
+          </span>
         </div>
         <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden">
           <motion.div
             className="h-2.5 rounded-full"
             style={{ background: 'linear-gradient(90deg, #FFD600, #FFA500)' }}
             initial={{ width: 0 }}
-            animate={{ width: '0%' }}
+            animate={{ width: challengeActive ? `${Math.max((challengeDays / 90) * 100, challengeDays > 0 ? 1 : 0)}%` : '0%' }}
             transition={{ duration: 1, ease: 'easeOut' }}
           />
         </div>
         <div className="flex justify-between mt-3 text-xs text-[#71717A]">
           <span>0 sesiones completadas</span>
-          <span>Comienza tu primer entreno</span>
+          <span>{challengeActive ? `${90 - challengeDays} días restantes` : `${totalSessions} sesiones en total`}</span>
         </div>
       </div>
 
@@ -586,27 +611,48 @@ export default function BoostScreen({ initialTab = 'program', sessionActive = fa
 
         {activeTab === 'nutrition' && (
           <motion.div key="nutrition" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
-            <div className="glass-effect rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-1">
-                <Apple className="w-4 h-4 text-[#FFD600]" />
-                <h3 className="font-bold text-[#F4F4F5]">Plan Nutricional · Boost Intermedio</h3>
-              </div>
-              <p className="text-[11px] text-[#71717A] mb-4">Adaptado a tu objetivo de hipertrofia.</p>
-              <div className="grid grid-cols-4 gap-2 mb-2">
-                {[
-                  { label: 'Kcal', value: '2.240', color: '#FFD600', Icon: Flame },
-                  { label: 'Proteína', value: '160g', color: '#22d3ee', Icon: Dumbbell },
-                  { label: 'Carbos', value: '244g', color: '#f59e0b', Icon: Wheat },
-                  { label: 'Grasas', value: '58g', color: '#f97316', Icon: Droplets },
-                ].map(m => (
-                  <div key={m.label} className="rounded-xl p-3 flex flex-col items-center gap-1" style={{ background: `${m.color}10`, border: `1px solid ${m.color}20` }}>
-                    <m.Icon className="w-3.5 h-3.5" style={{ color: m.color }} />
-                    <p className="text-sm font-black text-white">{m.value}</p>
-                    <p className="text-[9px] font-bold text-[#71717A] uppercase tracking-wide">{m.label}</p>
+            {(() => {
+              const w = profile?.weight_kg || 75;
+              const h = profile?.height_cm || 175;
+              const a = profile?.age || 25;
+              const g = profile?.gender || 'male';
+              const actMults = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9 };
+              const mult = actMults[profile?.activity_level] || 1.55;
+              const bmr = g === 'female' ? 10*w + 6.25*h - 5*a - 161 : 10*w + 6.25*h - 5*a + 5;
+              let cal = Math.round(bmr * mult);
+              const goal = profile?.goal || 'gain_muscle';
+              if (goal === 'lose_fat') cal -= 400;
+              if (goal === 'gain_muscle') cal += 250;
+              const prot = Math.round(w * 2.0);
+              const fat = Math.round((cal * 0.25) / 9);
+              const carbs = Math.round((cal - prot * 4 - fat * 9) / 4);
+              const goalLabels = { lose_fat: 'pérdida de grasa', gain_muscle: 'hipertrofia', recomp: 'recomposición', endurance: 'resistencia' };
+              const expLabelMap = { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' };
+              const expL = expLabelMap[profile?.training_experience] || 'Intermedio';
+              return (
+                <div className="glass-effect rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Apple className="w-4 h-4 text-[#FFD600]" />
+                    <h3 className="font-bold text-[#F4F4F5]">Plan Nutricional · {expL}</h3>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <p className="text-[11px] text-[#71717A] mb-4">Calculado para tu objetivo de {goalLabels[goal] || 'entrenamiento'}.</p>
+                  <div className="grid grid-cols-4 gap-2 mb-2">
+                    {[
+                      { label: 'Kcal', value: cal.toLocaleString(), color: '#FFD600', Icon: Flame },
+                      { label: 'Proteína', value: `${prot}g`, color: '#22d3ee', Icon: Dumbbell },
+                      { label: 'Carbos', value: `${carbs}g`, color: '#f59e0b', Icon: Wheat },
+                      { label: 'Grasas', value: `${fat}g`, color: '#f97316', Icon: Droplets },
+                    ].map(m => (
+                      <div key={m.label} className="rounded-xl p-3 flex flex-col items-center gap-1" style={{ background: `${m.color}10`, border: `1px solid ${m.color}20` }}>
+                        <m.Icon className="w-3.5 h-3.5" style={{ color: m.color }} />
+                        <p className="text-sm font-black text-white">{m.value}</p>
+                        <p className="text-[9px] font-bold text-[#71717A] uppercase tracking-wide">{m.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
             <div className="flex flex-col gap-3">
               {MEAL_PLAN.map((meal, i) => (
                 <motion.div
@@ -795,15 +841,33 @@ export default function BoostScreen({ initialTab = 'program', sessionActive = fa
               </div>
             </div>
 
-            {/* CTA */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setActiveTab('program')}
-              className="w-full py-4 rounded-2xl text-base font-black uppercase tracking-widest text-black border-none cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, #FFD600, #FFA500)', boxShadow: '0 8px 24px rgba(255,214,0,0.35)' }}
-            >
-              Comenzar el Reto
-            </motion.button>
+            {challengeActive ? (
+              <div className="glass-effect rounded-2xl p-5 flex items-center gap-4"
+                style={{ border: '1px solid rgba(255,214,0,0.25)', background: 'linear-gradient(135deg, rgba(255,214,0,0.05) 0%, transparent 100%)' }}>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(255,214,0,0.15)', border: '1px solid rgba(255,214,0,0.3)' }}>
+                  <Zap className="w-6 h-6 text-[#FFD600]" fill="#FFD600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-black text-[#FFD600] text-sm uppercase tracking-wide">Reto Boost Activo</p>
+                  <p className="text-xs text-[#71717A] mt-0.5">Día {challengeDays} de 90 · {90 - challengeDays} días restantes</p>
+                </div>
+                <motion.button whileTap={{ scale: 0.97 }} onClick={() => setActiveTab('today')}
+                  className="px-4 py-2 rounded-xl text-xs font-black text-black uppercase tracking-wide border-none cursor-pointer"
+                  style={{ background: '#FFD600' }}>
+                  Entrenar
+                </motion.button>
+              </div>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={onStartChallenge}
+                className="w-full py-4 rounded-2xl text-base font-black uppercase tracking-widest text-black border-none cursor-pointer flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #FFD600, #FFA500)', boxShadow: '0 8px 24px rgba(255,214,0,0.35)' }}
+              >
+                <Zap className="w-5 h-5" fill="black" /> Activar mi Reto Boost
+              </motion.button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
