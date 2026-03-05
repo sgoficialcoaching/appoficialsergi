@@ -381,28 +381,47 @@ function ProgramBanner({ name, onContinue }) {
 }
 
 function WeeklyCalendar({ onTodayClick }) {
+  const [weekOffset, setWeekOffset] = useState(0);
   const days = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
-  const dates = [2, 3, 4, 5, 6, 7, 8];
   const plan = ['Push', 'Pull', 'Legs', 'Hombros', 'Full', 'Cardio', 'Rest'];
-  const todayIdx = 2;
+  const currentWeekStart = 2;
+  const todayDate = 4;
+  const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  const weekDates = days.map((_, i) => currentWeekStart + i + weekOffset * 7);
+  const monthIdx = 2;
+  const year = 2026;
+
+  const isCurrentWeek = weekOffset === 0;
+
   return (
     <div className="glass-effect rounded-2xl p-5 sm:p-6">
       <div className="flex justify-between items-center mb-5">
         <div>
           <h3 className="text-xl font-bold text-[#FFD600]">Intermedio</h3>
-          <p className="text-[11px] text-[#71717A] font-bold uppercase tracking-widest">Plan Semanal · Mar 2026</p>
+          <p className="text-[11px] text-[#71717A] font-bold uppercase tracking-widest">
+            {MONTHS[monthIdx]} {year} {weekOffset !== 0 && `· ${weekOffset > 0 ? '+' : ''}${weekOffset}sem`}
+          </p>
         </div>
         <div className="flex gap-2">
-          {[ArrowLeft, ArrowRight].map((Icon, i) => (
-            <button key={i} className="w-8 h-8 rounded-full bg-[#111113] border-none cursor-pointer flex items-center justify-center text-[#F4F4F5] hover:text-[#FFD600] transition-colors">
-              <Icon className="w-4 h-4" />
-            </button>
-          ))}
+          <button
+            onClick={() => setWeekOffset(o => o - 1)}
+            className="w-8 h-8 rounded-full bg-[#111113] border-none cursor-pointer flex items-center justify-center text-[#F4F4F5] hover:text-[#FFD600] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setWeekOffset(o => o + 1)}
+            className="w-8 h-8 rounded-full bg-[#111113] border-none cursor-pointer flex items-center justify-center text-[#F4F4F5] hover:text-[#FFD600] transition-colors"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
       <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2">
         {days.map((day, i) => {
-          const isToday = i === todayIdx;
+          const date = weekDates[i];
+          const isToday = isCurrentWeek && date === todayDate;
           const isRest = plan[i] === 'Rest';
           return (
             <motion.div
@@ -419,7 +438,7 @@ function WeeklyCalendar({ onTodayClick }) {
               }}
             >
               <p className="text-[9px] font-black tracking-widest mb-1 opacity-70">{day}</p>
-              <p className="text-2xl font-black mb-2">{dates[i]}</p>
+              <p className="text-2xl font-black mb-2">{date}</p>
               {isRest
                 ? <Clock className="w-4 h-4" />
                 : <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center" style={{ borderColor: isToday ? '#000' : 'rgba(255,255,255,0.3)' }}>

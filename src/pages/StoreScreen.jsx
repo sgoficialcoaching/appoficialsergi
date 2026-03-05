@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Star, ShoppingCart, Check, Search, ListFilter as Filter, Zap, Package } from 'lucide-react';
+import { ShoppingBag, Star, ShoppingCart, Check, Search, Zap, Package, X, Trash2, Plus, Minus } from 'lucide-react';
 
 const PRODUCTS = [
   {
@@ -14,7 +14,6 @@ const PRODUCTS = [
     badge: 'Más vendido',
     image: 'https://images.pexels.com/photos/3490348/pexels-photo-3490348.jpeg?auto=compress&cs=tinysrgb&w=400',
     flavors: ['Chocolate', 'Vainilla', 'Fresa'],
-    inCart: false,
   },
   {
     id: 2,
@@ -27,7 +26,6 @@ const PRODUCTS = [
     badge: 'Nuevo',
     image: 'https://images.pexels.com/photos/4397840/pexels-photo-4397840.jpeg?auto=compress&cs=tinysrgb&w=400',
     flavors: ['Sandía', 'Limón'],
-    inCart: false,
   },
   {
     id: 3,
@@ -40,7 +38,6 @@ const PRODUCTS = [
     badge: null,
     image: 'https://images.pexels.com/photos/3766111/pexels-photo-3766111.jpeg?auto=compress&cs=tinysrgb&w=400',
     flavors: ['Neutro'],
-    inCart: false,
   },
   {
     id: 4,
@@ -53,7 +50,6 @@ const PRODUCTS = [
     badge: 'Edición limitada',
     image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg?auto=compress&cs=tinysrgb&w=400',
     flavors: ['Negro', 'Blanco', 'Gris'],
-    inCart: false,
   },
   {
     id: 5,
@@ -66,7 +62,6 @@ const PRODUCTS = [
     badge: null,
     image: 'https://images.pexels.com/photos/3764538/pexels-photo-3764538.jpeg?auto=compress&cs=tinysrgb&w=400',
     flavors: ['Negro', 'Amarillo'],
-    inCart: false,
   },
   {
     id: 6,
@@ -79,18 +74,144 @@ const PRODUCTS = [
     badge: null,
     image: 'https://images.pexels.com/photos/3823207/pexels-photo-3823207.jpeg?auto=compress&cs=tinysrgb&w=400',
     flavors: ['Negro/Dorado'],
-    inCart: false,
   },
 ];
 
 const CATEGORIES = ['Todos', 'Suplementos', 'Ropa', 'Accesorios'];
+const PROMO_CODE = 'BOOST20';
+const PROMO_DISCOUNT = 0.20;
+
+function CartDrawer({ cart, onClose, onUpdateQty, onRemove }) {
+  const [promoInput, setPromoInput] = useState('');
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoError, setPromoError] = useState('');
+
+  const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const discount = promoApplied ? subtotal * PROMO_DISCOUNT : 0;
+  const total = subtotal - discount;
+
+  const applyPromo = () => {
+    if (promoInput.trim().toUpperCase() === PROMO_CODE) {
+      setPromoApplied(true);
+      setPromoError('');
+    } else {
+      setPromoError('Código no válido');
+      setPromoApplied(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-end"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ x: 60, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: 60, opacity: 0 }}
+        className="w-full sm:w-96 h-full flex flex-col"
+        style={{ background: '#1A1A1C', borderLeft: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-white/5">
+          <h3 className="font-black text-white flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-[#FFD600]" /> Mi carrito
+          </h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#111113] flex items-center justify-center border-none cursor-pointer text-[#71717A] hover:text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-3">
+          {cart.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
+              <ShoppingCart className="w-12 h-12 text-[#71717A]" />
+              <p className="text-[#71717A] font-bold">Tu carrito está vacío</p>
+            </div>
+          )}
+          {cart.map(item => (
+            <div key={item.id} className="flex items-center gap-3 bg-[#111113] rounded-xl p-3">
+              <img src={item.image} alt={item.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-[#F4F4F5] truncate">{item.name}</p>
+                <p className="text-xs text-[#71717A]">{item.price.toFixed(2)}€ c/u</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <button onClick={() => onUpdateQty(item.id, item.qty - 1)} className="w-6 h-6 rounded-md bg-[#0A0A0C] flex items-center justify-center border-none cursor-pointer text-[#71717A] hover:text-white transition-colors">
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span className="text-sm font-black text-white w-4 text-center">{item.qty}</span>
+                  <button onClick={() => onUpdateQty(item.id, item.qty + 1)} className="w-6 h-6 rounded-md bg-[#0A0A0C] flex items-center justify-center border-none cursor-pointer text-[#71717A] hover:text-white transition-colors">
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <span className="text-sm font-black text-[#F4F4F5]">{(item.price * item.qty).toFixed(2)}€</span>
+                <button onClick={() => onRemove(item.id)} className="text-[#71717A] hover:text-red-400 transition-colors border-none bg-transparent cursor-pointer">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {cart.length > 0 && (
+          <div className="p-5 border-t border-white/5 flex flex-col gap-3">
+            <div className="flex gap-2">
+              <input
+                value={promoInput}
+                onChange={e => { setPromoInput(e.target.value); setPromoError(''); }}
+                placeholder="Código descuento (BOOST20)"
+                className="flex-1 bg-[#111113] border rounded-xl px-3 py-2 text-sm text-[#F4F4F5] placeholder:text-[#71717A] outline-none transition-colors"
+                style={{ borderColor: promoApplied ? 'rgba(34,197,94,0.4)' : promoError ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)' }}
+              />
+              <button
+                onClick={applyPromo}
+                disabled={promoApplied}
+                className="px-3 py-2 rounded-xl text-xs font-black uppercase border-none cursor-pointer transition-all"
+                style={{ background: promoApplied ? 'rgba(34,197,94,0.15)' : '#FFD600', color: promoApplied ? '#22c55e' : '#000' }}
+              >
+                {promoApplied ? <Check className="w-4 h-4" /> : 'Aplicar'}
+              </button>
+            </div>
+            {promoError && <p className="text-xs text-red-400">{promoError}</p>}
+            {promoApplied && <p className="text-xs text-green-400">Descuento del 20% aplicado</p>}
+            <div className="flex flex-col gap-1 text-sm">
+              <div className="flex justify-between text-[#71717A]">
+                <span>Subtotal</span><span>{subtotal.toFixed(2)}€</span>
+              </div>
+              {promoApplied && (
+                <div className="flex justify-between text-green-400">
+                  <span>Descuento BOOST20</span><span>-{discount.toFixed(2)}€</span>
+                </div>
+              )}
+              <div className="flex justify-between font-black text-white text-base border-t border-white/5 pt-2 mt-1">
+                <span>Total</span><span>{total.toFixed(2)}€</span>
+              </div>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-wide border-none cursor-pointer"
+              style={{ background: '#FFD600', color: '#000' }}
+            >
+              Finalizar compra
+            </motion.button>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function ProductCard({ product, onAddToCart }) {
   const [added, setAdded] = useState(false);
 
   const handleAdd = () => {
     setAdded(true);
-    onAddToCart(product.id);
+    onAddToCart(product);
     setTimeout(() => setAdded(false), 2000);
   };
 
@@ -109,8 +230,7 @@ function ProductCard({ product, onAddToCart }) {
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7) 100%)' }} />
         {product.badge && (
           <div className="absolute top-2 left-2">
-            <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-black"
-              style={{ background: '#FFD600' }}>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-black" style={{ background: '#FFD600' }}>
               {product.badge}
             </span>
           </div>
@@ -170,9 +290,25 @@ function ProductCard({ product, onAddToCart }) {
 export default function StoreScreen() {
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [search, setSearch] = useState('');
-  const [cartCount, setCartCount] = useState(0);
+  const [cart, setCart] = useState([]);
+  const [showCart, setShowCart] = useState(false);
 
-  const handleAddToCart = () => setCartCount(c => c + 1);
+  const cartCount = cart.reduce((acc, i) => acc + i.qty, 0);
+
+  const handleAddToCart = (product) => {
+    setCart(c => {
+      const existing = c.find(i => i.id === product.id);
+      if (existing) return c.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      return [...c, { ...product, qty: 1 }];
+    });
+  };
+
+  const handleUpdateQty = (id, qty) => {
+    if (qty <= 0) { setCart(c => c.filter(i => i.id !== id)); return; }
+    setCart(c => c.map(i => i.id === id ? { ...i, qty } : i));
+  };
+
+  const handleRemove = (id) => setCart(c => c.filter(i => i.id !== id));
 
   const filtered = PRODUCTS.filter(p => {
     const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
@@ -182,13 +318,12 @@ export default function StoreScreen() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F4F5]">Tienda</h2>
           <p className="text-[#71717A] text-sm">Suplementos, ropa y accesorios.</p>
         </div>
-        <motion.div whileTap={{ scale: 0.95 }} className="relative cursor-pointer">
+        <motion.div whileTap={{ scale: 0.95 }} onClick={() => setShowCart(true)} className="relative cursor-pointer">
           <div className="w-10 h-10 rounded-xl bg-[#111113] flex items-center justify-center">
             <ShoppingBag className="w-5 h-5 text-[#F4F4F5]" />
           </div>
@@ -201,7 +336,6 @@ export default function StoreScreen() {
         </motion.div>
       </div>
 
-      {/* Promo banner */}
       <div className="relative rounded-2xl overflow-hidden h-28 flex items-center px-5"
         style={{ background: 'linear-gradient(135deg, #1A1800 0%, #2A2200 100%)', border: '1px solid rgba(255,214,0,0.2)' }}>
         <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full opacity-20" style={{ background: '#FFD600', filter: 'blur(40px)' }} />
@@ -214,14 +348,16 @@ export default function StoreScreen() {
           <p className="text-xs text-[#71717A]">Solo esta semana · Código: <span className="text-[#FFD600] font-bold">BOOST20</span></p>
         </div>
         <div className="ml-auto relative z-10 flex-shrink-0">
-          <button className="px-3 py-2 rounded-xl text-xs font-black uppercase text-black border-none cursor-pointer"
-            style={{ background: '#FFD600' }}>
+          <button
+            onClick={() => setShowCart(true)}
+            className="px-3 py-2 rounded-xl text-xs font-black uppercase text-black border-none cursor-pointer"
+            style={{ background: '#FFD600' }}
+          >
             Aplicar
           </button>
         </div>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A] pointer-events-none" />
         <input
@@ -233,7 +369,6 @@ export default function StoreScreen() {
         />
       </div>
 
-      {/* Category filter */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
         {CATEGORIES.map(c => (
           <button
@@ -250,7 +385,6 @@ export default function StoreScreen() {
         ))}
       </div>
 
-      {/* Products grid */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeCategory + search}
@@ -269,6 +403,17 @@ export default function StoreScreen() {
             </div>
           )}
         </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showCart && (
+          <CartDrawer
+            cart={cart}
+            onClose={() => setShowCart(false)}
+            onUpdateQty={handleUpdateQty}
+            onRemove={handleRemove}
+          />
+        )}
       </AnimatePresence>
     </div>
   );

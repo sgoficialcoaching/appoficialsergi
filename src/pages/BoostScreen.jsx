@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Play, Lock, CircleCheck as CheckCircle, Clock, ChevronRight, Dumbbell, Target, Star, ArrowRight, Apple, Flame, Droplets, Wheat, ArrowLeft, ChevronUp, ChevronDown, X, Trophy } from 'lucide-react';
 
@@ -159,10 +159,10 @@ function WorkoutSession({ onFinish, onExit }) {
   const [restSeconds, setRestSeconds] = useState(0);
   const [showExitModal, setShowExitModal] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     const t = setInterval(() => setElapsed(s => s + 1), 1000);
     return () => clearInterval(t);
-  });
+  }, []);
 
   const fmtTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   const ex = EXERCISES[currentExercise];
@@ -418,6 +418,16 @@ function WorkoutSession({ onFinish, onExit }) {
 export default function BoostScreen({ initialTab = 'program', sessionActive = false, onSessionStart, onSessionEnd }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedDay, setSelectedDay] = useState(3);
+  const [lockedToast, setLockedToast] = useState(false);
+
+  const handleProgramStart = (program) => {
+    if (program.locked) {
+      setLockedToast(true);
+      setTimeout(() => setLockedToast(false), 2500);
+      return;
+    }
+    setActiveTab('today');
+  };
 
   if (sessionActive) {
     return <WorkoutSession onFinish={onSessionEnd} onExit={onSessionEnd} />;
@@ -634,8 +644,23 @@ export default function BoostScreen({ initialTab = 'program', sessionActive = fa
           <motion.div key="plans" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
             <p className="text-sm text-[#71717A]">Elige el programa que se adapte a tu nivel.</p>
             {PROGRAMS.map(p => (
-              <ProgramCard key={p.id} program={p} onStart={() => {}} />
+              <ProgramCard key={p.id} program={p} onStart={handleProgramStart} />
             ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {lockedToast && (
+          <motion.div
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-3 rounded-xl"
+            style={{ background: '#1A1A1C', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+          >
+            <Lock className="w-4 h-4 text-[#71717A]" />
+            <p className="text-sm font-bold text-[#F4F4F5] whitespace-nowrap">Completa el nivel anterior para desbloquear</p>
           </motion.div>
         )}
       </AnimatePresence>
