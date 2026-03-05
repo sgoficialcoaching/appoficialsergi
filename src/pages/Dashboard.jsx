@@ -439,11 +439,21 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState('home');
   const [boostTab, setBoostTab] = useState('program');
+  const [sessionActive, setSessionActive] = useState(false);
+  const [sessionElapsed, setSessionElapsed] = useState(0);
 
   const goToBoost = (tab = 'today') => {
     setBoostTab(tab);
     setActiveNav('boost');
   };
+
+  useEffect(() => {
+    if (!sessionActive) { setSessionElapsed(0); return; }
+    const t = setInterval(() => setSessionElapsed(s => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [sessionActive]);
+
+  const fmtTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => { setUser(user); setLoading(false); });
@@ -569,7 +579,7 @@ export default function Dashboard() {
             )}
             {activeNav === 'boost' && (
               <motion.div key="boost" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <BoostScreen initialTab={boostTab} />
+                <BoostScreen initialTab={boostTab} sessionActive={sessionActive} onSessionStart={() => setSessionActive(true)} onSessionEnd={() => setSessionActive(false)} />
               </motion.div>
             )}
             {activeNav === 'analytics' && (
@@ -585,6 +595,39 @@ export default function Dashboard() {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Active session banner */}
+      <AnimatePresence>
+        {sessionActive && activeNav !== 'boost' && (
+          <motion.div
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+            className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3"
+            style={{
+              background: 'linear-gradient(90deg, #1a1600, #0A0A0C)',
+              borderBottom: '1px solid rgba(255,214,0,0.3)',
+              paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-[#FFD600] animate-pulse" />
+              <div>
+                <p className="text-xs font-black text-white uppercase tracking-wide">Entrenamiento en curso</p>
+                <p className="text-[10px] text-[#71717A]">Push B · {fmtTime(sessionElapsed)}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => goToBoost('today')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-black text-[10px] font-black uppercase tracking-wide border-none cursor-pointer"
+              style={{ background: '#FFD600' }}
+            >
+              <Zap className="w-3 h-3" /> Volver
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
       <motion.nav

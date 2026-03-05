@@ -149,7 +149,7 @@ const MEAL_PLAN = [
   },
 ];
 
-function WorkoutSession({ onFinish }) {
+function WorkoutSession({ onFinish, onExit }) {
   const [currentExercise, setCurrentExercise] = useState(0);
   const [sets, setSets] = useState(EXERCISES.map(() => []));
   const [reps, setReps] = useState('10');
@@ -157,6 +157,7 @@ function WorkoutSession({ onFinish }) {
   const [elapsed, setElapsed] = useState(0);
   const [resting, setResting] = useState(false);
   const [restSeconds, setRestSeconds] = useState(0);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   useState(() => {
     const t = setInterval(() => setElapsed(s => s + 1), 1000);
@@ -193,9 +194,57 @@ function WorkoutSession({ onFinish }) {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col gap-4"
     >
+      <AnimatePresence>
+        {showExitModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4"
+              style={{ background: '#1A1A1C', border: '1px solid rgba(255,214,0,0.2)', boxShadow: '0 25px 50px rgba(0,0,0,0.6)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,214,0,0.1)' }}>
+                  <Zap className="w-5 h-5 text-[#FFD600]" />
+                </div>
+                <div>
+                  <h3 className="font-black text-white text-base">Entrenamiento en curso</h3>
+                  <p className="text-[11px] text-[#71717A]">Tiempo: {fmtTime(elapsed)}</p>
+                </div>
+              </div>
+              <p className="text-sm text-[#A1A1AA] leading-relaxed">
+                Tu sesión <span className="font-bold text-white">Push B</span> todavía no está finalizada. Si sales ahora, el progreso no se guardará.
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setShowExitModal(false)}
+                  className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-wide border-none cursor-pointer"
+                  style={{ background: '#FFD600', color: '#000' }}
+                >
+                  Continuar entrenando
+                </button>
+                <button
+                  onClick={() => { setShowExitModal(false); onExit(); }}
+                  className="w-full py-2.5 rounded-xl text-sm font-bold text-[#71717A] border border-white/10 bg-transparent cursor-pointer hover:text-white transition-colors"
+                >
+                  Salir sin guardar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center justify-between">
         <button
-          onClick={onFinish}
+          onClick={() => setShowExitModal(true)}
           className="flex items-center gap-2 text-[#71717A] hover:text-[#F4F4F5] transition-colors border-none bg-transparent cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -366,13 +415,12 @@ function WorkoutSession({ onFinish }) {
   );
 }
 
-export default function BoostScreen({ initialTab = 'program' }) {
+export default function BoostScreen({ initialTab = 'program', sessionActive = false, onSessionStart, onSessionEnd }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedDay, setSelectedDay] = useState(3);
-  const [sessionActive, setSessionActive] = useState(false);
 
   if (sessionActive) {
-    return <WorkoutSession onFinish={() => setSessionActive(false)} />;
+    return <WorkoutSession onFinish={onSessionEnd} onExit={onSessionEnd} />;
   }
 
   return (
@@ -490,7 +538,7 @@ export default function BoostScreen({ initialTab = 'program' }) {
               <div className="absolute bottom-4 right-4 flex gap-2">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSessionActive(true)}
+                  onClick={onSessionStart}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-black text-xs font-black uppercase cursor-pointer border-none"
                   style={{ background: '#FFD600' }}
                 >
