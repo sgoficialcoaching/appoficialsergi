@@ -102,7 +102,7 @@ function BottomNavButton({ id, label, Icon, active, onClick }) {
 }
 
 function PerformanceWidget() {
-  const score = 72;
+  const score = 0;
   const radius = 56;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
@@ -131,19 +131,19 @@ function PerformanceWidget() {
           <p className="text-[10px] font-bold text-[#71717A] uppercase tracking-widest">PUNTOS</p>
         </div>
       </div>
-      <p className="text-center text-xs text-[#71717A]">Combina energía, racha y último entreno.</p>
+      <p className="text-center text-xs text-[#71717A]">Completa tu primer entreno para sumar puntos.</p>
     </div>
   );
 }
 
 function MuscleFocusWidget() {
   const muscles = [
-    { name: 'Pecho', intensity: 0.8 },
-    { name: 'Espalda', intensity: 0.65 },
-    { name: 'Hombros', intensity: 0.4 },
-    { name: 'Bíceps', intensity: 0.55 },
-    { name: 'Tríceps', intensity: 0.3 },
-    { name: 'Piernas', intensity: 0.7 },
+    { name: 'Pecho', intensity: 0 },
+    { name: 'Espalda', intensity: 0 },
+    { name: 'Hombros', intensity: 0 },
+    { name: 'Bíceps', intensity: 0 },
+    { name: 'Tríceps', intensity: 0 },
+    { name: 'Piernas', intensity: 0 },
   ];
   return (
     <div className="glass-effect rounded-2xl p-6">
@@ -156,7 +156,7 @@ function MuscleFocusWidget() {
           <div key={m.name}>
             <div className="flex justify-between text-xs font-bold mb-1">
               <span className="uppercase tracking-wide text-[#F4F4F5]">{m.name}</span>
-              <span className="text-[#FFD600]">{Math.round(m.intensity * 100)}%</span>
+              <span className="text-[#71717A]">—</span>
             </div>
             <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
               <motion.div
@@ -169,15 +169,16 @@ function MuscleFocusWidget() {
           </div>
         ))}
       </div>
+      <p className="text-xs text-[#71717A] text-center mt-4">Entrena para ver tu foco muscular aquí.</p>
     </div>
   );
 }
 
 function MilestoneWidget() {
   const prs = [
-    { name: 'Press Banca', value: '100kg', date: '01/03/2026' },
-    { name: 'Sentadilla', value: '140kg', date: '28/02/2026' },
-    { name: 'Peso Muerto', value: '160kg', date: '25/02/2026' },
+    { name: 'Press Banca', value: '—', date: 'Sin registro' },
+    { name: 'Sentadilla', value: '—', date: 'Sin registro' },
+    { name: 'Peso Muerto', value: '—', date: 'Sin registro' },
   ];
   return (
     <div className="glass-effect rounded-2xl p-6">
@@ -186,16 +187,15 @@ function MilestoneWidget() {
       </h3>
       <p className="text-[#71717A] text-sm mb-6">Tus mejores marcas y días legendarios.</p>
       <div className="flex flex-col gap-2">
-        <div className="bg-[#111113] p-3 rounded-xl border border-[rgba(255,214,0,0.2)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 bg-[#FFD600] text-black text-[10px] font-black px-2 py-0.5 rounded-bl-lg">MEJOR SESIÓN</div>
+        <div className="bg-[#111113] p-3 rounded-xl border border-white/5 relative overflow-hidden">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[rgba(255,214,0,0.1)] rounded-lg">
-              <Calendar className="w-5 h-5 text-[#FFD600]" />
+            <div className="p-2 bg-[rgba(255,255,255,0.04)] rounded-lg">
+              <Calendar className="w-5 h-5 text-[#71717A]" />
             </div>
             <div>
               <p className="text-[11px] text-[#71717A] font-bold uppercase">Mayor Volumen</p>
-              <p className="text-sm font-bold text-white">12.5k kg totales</p>
-              <p className="text-[10px] text-[#71717A]">03/03/2026</p>
+              <p className="text-sm font-bold text-[#71717A]">Aún no registrado</p>
+              <p className="text-[10px] text-[#71717A]">Completa tu primer entreno</p>
             </div>
           </div>
         </div>
@@ -207,8 +207,8 @@ function MilestoneWidget() {
               <p className="text-[10px] text-[#71717A]">{pr.date}</p>
             </div>
             <div className="flex items-center gap-1 bg-[#111113] px-2 py-1 rounded-lg border border-white/10">
-              <Star className="w-3 h-3 text-[#FFD600]" />
-              <span className="text-xs font-black text-[#F4F4F5]">{pr.value}</span>
+              <Star className="w-3 h-3 text-[#71717A]" />
+              <span className="text-xs font-black text-[#71717A]">{pr.value}</span>
             </div>
           </div>
         ))}
@@ -249,11 +249,11 @@ function QuickActionsWidget({ onTrain, onFood }) {
 
 function NutritionCard() {
   const macros = [
-    { label: 'Proteínas', value: 142, target: 200, color: '#22d3ee', bg: 'rgba(34,211,238,0.08)' },
-    { label: 'Carbos', value: 210, target: 300, color: '#d946ef', bg: 'rgba(217,70,239,0.08)' },
-    { label: 'Grasas', value: 55, target: 80, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
+    { label: 'Proteínas', value: 0, target: 200, color: '#22d3ee', bg: 'rgba(34,211,238,0.08)' },
+    { label: 'Carbos', value: 0, target: 300, color: '#d946ef', bg: 'rgba(217,70,239,0.08)' },
+    { label: 'Grasas', value: 0, target: 80, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
   ];
-  const kcal = 1840, kcalTarget = 2500;
+  const kcal = 0, kcalTarget = 2500;
   const kcalPct = (kcal / kcalTarget) * 100;
   const r = 28, circ = 2 * Math.PI * r;
   return (
@@ -338,20 +338,21 @@ function NutritionCard() {
   );
 }
 
-function ProgramBanner({ name, onContinue }) {
+function ProgramBanner({ onStart }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="relative w-full h-48 sm:h-56 md:h-64 rounded-3xl overflow-hidden cursor-pointer mb-6 md:mb-8 group"
       style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
+      onClick={onStart}
     >
       <img
-        src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800"
-        alt="Program"
+        src="https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg?auto=compress&cs=tinysrgb&w=800"
+        alt="Reto Boost"
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.65) 55%, transparent 100%)' }} />
       <div className="absolute inset-0 p-5 sm:p-8 flex flex-col justify-center items-start z-10">
         <motion.div
           initial={{ x: -20, opacity: 0 }}
@@ -360,19 +361,19 @@ function ProgramBanner({ name, onContinue }) {
           className="text-black text-[10px] font-black px-3 py-1 rounded-full mb-3 uppercase tracking-widest"
           style={{ background: '#FFD600', boxShadow: '0 0 15px rgba(255,214,0,0.6)' }}
         >
-          Programa Activo
+          Reto 90 Dias
         </motion.div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase leading-none mb-2 italic drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
-          {name}
+          Boost Challenge
         </h2>
         <p className="text-gray-300 max-w-xs text-xs sm:text-sm mb-4 font-medium hidden sm:block">
-          Supera tus límites con el plan definitivo de hipertrofia y fuerza.
+          Transforma tu cuerpo en 3 meses. Empieza hoy.
         </p>
         <button
-          onClick={onContinue}
+          onClick={onStart}
           className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold uppercase tracking-wide"
         >
-          Continuar
+          Unirse al Reto
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
@@ -574,7 +575,7 @@ export default function Dashboard() {
                     className="w-11 h-11 rounded-full ring-2 ring-[rgba(255,214,0,0.3)]"
                   />
                 </div>
-                <ProgramBanner name="Boost Intermedio" onContinue={() => goToBoost('today')} />
+                <ProgramBanner onStart={() => { setActiveNav('boost'); setBoostTab('reto'); }} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
                   <div className="lg:col-span-2 flex flex-col gap-5">
                     <WeeklyCalendar onTodayClick={() => goToBoost('today')} />

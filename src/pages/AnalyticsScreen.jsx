@@ -4,39 +4,29 @@ import { TrendingUp, Activity, Dumbbell, Flame, Calendar, ChevronUp, ChevronDown
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const VOLUME_DATA = [
-  { week: 'S1', volume: 6200 },
-  { week: 'S2', volume: 7100 },
-  { week: 'S3', volume: 6800 },
-  { week: 'S4', volume: 8200 },
-  { week: 'S5', volume: 9100 },
-  { week: 'S6', volume: 8700 },
+  { week: 'S1', volume: 0 },
+  { week: 'S2', volume: 0 },
+  { week: 'S3', volume: 0 },
+  { week: 'S4', volume: 0 },
+  { week: 'S5', volume: 0 },
+  { week: 'S6', volume: 0 },
 ];
 
 const STRENGTH_DATA = [
-  { month: 'Ene', banca: 80, sentadilla: 110, deadlift: 130 },
-  { month: 'Feb', banca: 85, sentadilla: 118, deadlift: 140 },
-  { month: 'Mar', banca: 90, sentadilla: 125, deadlift: 148 },
-  { month: 'Abr', banca: 92, sentadilla: 130, deadlift: 152 },
-  { month: 'May', banca: 96, sentadilla: 136, deadlift: 158 },
-  { month: 'Jun', banca: 100, sentadilla: 140, deadlift: 160 },
+  { month: 'M1', banca: 0, sentadilla: 0, deadlift: 0 },
 ];
 
 const BODY_DATA = [
-  { month: 'Ene', weight: 78, fat: 18 },
-  { month: 'Feb', weight: 79.5, fat: 17.2 },
-  { month: 'Mar', weight: 80.8, fat: 16.5 },
-  { month: 'Abr', weight: 81.5, fat: 15.8 },
-  { month: 'May', weight: 82.1, fat: 15.2 },
-  { month: 'Jun', weight: 83, fat: 14.5 },
+  { month: 'M1', weight: 0, fat: 0 },
 ];
 
 const MUSCLE_DATA = [
-  { group: 'Pecho', sets: 24 },
-  { group: 'Espalda', sets: 22 },
-  { group: 'Hombros', sets: 18 },
-  { group: 'Bíceps', sets: 14 },
-  { group: 'Tríceps', sets: 16 },
-  { group: 'Piernas', sets: 28 },
+  { group: 'Pecho', sets: 0 },
+  { group: 'Espalda', sets: 0 },
+  { group: 'Hombros', sets: 0 },
+  { group: 'Bíceps', sets: 0 },
+  { group: 'Tríceps', sets: 0 },
+  { group: 'Piernas', sets: 0 },
 ];
 
 const customTooltipStyle = {
@@ -78,10 +68,10 @@ export default function AnalyticsScreen() {
 
       {/* KPI Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Peso Corporal" value="83.0" unit="kg" delta="+5kg" Icon={Activity} positive={true} />
-        <StatCard label="Grasa Corporal" value="14.5" unit="%" delta="-3.5%" Icon={Flame} positive={true} />
-        <StatCard label="Volumen Sem." value="8.7k" unit="kg" delta="+12%" Icon={Dumbbell} positive={true} />
-        <StatCard label="Sesiones Mes" value="18" unit="/20" delta="-2" Icon={Calendar} positive={false} />
+        <StatCard label="Peso Corporal" value="—" unit="kg" delta="Por registrar" Icon={Activity} positive={true} />
+        <StatCard label="Grasa Corporal" value="—" unit="%" delta="Por registrar" Icon={Flame} positive={true} />
+        <StatCard label="Volumen Sem." value="0" unit="kg" delta="0%" Icon={Dumbbell} positive={true} />
+        <StatCard label="Sesiones Mes" value="0" unit="/0" delta="0" Icon={Calendar} positive={true} />
       </div>
 
       {/* Tabs */}
@@ -188,14 +178,14 @@ export default function AnalyticsScreen() {
             {/* PR cards */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { name: 'Press Banca', pr: '100kg', delta: '+20kg' },
-                { name: 'Sentadilla', pr: '140kg', delta: '+30kg' },
-                { name: 'Peso Muerto', pr: '160kg', delta: '+30kg' },
+                { name: 'Press Banca', pr: '—', delta: 'Sin datos' },
+                { name: 'Sentadilla', pr: '—', delta: 'Sin datos' },
+                { name: 'Peso Muerto', pr: '—', delta: 'Sin datos' },
               ].map(p => (
                 <div key={p.name} className="glass-effect rounded-xl p-3 text-center">
                   <p className="text-[9px] text-[#71717A] font-bold uppercase tracking-wide leading-tight mb-1">{p.name}</p>
-                  <p className="text-xl font-black text-[#FFD600]">{p.pr}</p>
-                  <p className="text-[10px] text-green-400 font-bold">{p.delta}</p>
+                  <p className="text-xl font-black text-[#71717A]">{p.pr}</p>
+                  <p className="text-[10px] text-[#71717A] font-bold">{p.delta}</p>
                 </div>
               ))}
             </div>
@@ -235,10 +225,10 @@ export default function AnalyticsScreen() {
             {/* Body stats */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Masa Muscular', value: '71.1kg', delta: '+8.5kg', color: '#22d3ee' },
-                { label: 'Masa Grasa', value: '11.9kg', delta: '-2.9kg', color: '#ef4444' },
-                { label: 'IMC', value: '27.1', delta: '+1.7', color: '#FFD600' },
-                { label: 'Peso Ideal', value: '79-85kg', delta: 'Rango', color: '#a3e635' },
+                { label: 'Masa Muscular', value: '—', delta: 'Sin datos', color: '#22d3ee' },
+                { label: 'Masa Grasa', value: '—', delta: 'Sin datos', color: '#ef4444' },
+                { label: 'IMC', value: '—', delta: 'Sin datos', color: '#FFD600' },
+                { label: 'Peso Ideal', value: '—', delta: 'Por registrar', color: '#a3e635' },
               ].map(s => (
                 <div key={s.label} className="glass-effect rounded-xl p-4">
                   <div className="w-2 h-2 rounded-full mb-2" style={{ background: s.color }} />

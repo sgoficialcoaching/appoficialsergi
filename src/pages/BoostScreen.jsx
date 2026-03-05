@@ -441,9 +441,9 @@ export default function BoostScreen({ initialTab = 'program', sessionActive = fa
           <h2 className="text-2xl sm:text-3xl font-bold text-[#F4F4F5]">Boost</h2>
           <p className="text-[#71717A] text-sm">Tus programas de entrenamiento.</p>
         </div>
-        <div className="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wide text-black"
-          style={{ background: '#FFD600' }}>
-          Sem 6/10
+        <div className="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wide text-[#71717A]"
+          style={{ background: '#111113' }}>
+          Sem 0/12
         </div>
       </div>
 
@@ -451,28 +451,29 @@ export default function BoostScreen({ initialTab = 'program', sessionActive = fa
       <div className="glass-effect rounded-2xl p-4">
         <div className="flex justify-between text-xs font-bold mb-2">
           <span className="text-[#71717A]">Progreso general</span>
-          <span className="text-[#FFD600]">60%</span>
+          <span className="text-[#71717A]">0%</span>
         </div>
         <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden">
           <motion.div
             className="h-2.5 rounded-full"
             style={{ background: 'linear-gradient(90deg, #FFD600, #FFA500)' }}
             initial={{ width: 0 }}
-            animate={{ width: '60%' }}
+            animate={{ width: '0%' }}
             transition={{ duration: 1, ease: 'easeOut' }}
           />
         </div>
         <div className="flex justify-between mt-3 text-xs text-[#71717A]">
-          <span>24 sesiones completadas</span>
-          <span>16 restantes</span>
+          <span>0 sesiones completadas</span>
+          <span>Comienza tu primer entreno</span>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 bg-[#111113] p-1 rounded-xl">
+      <div className="flex gap-2 bg-[#111113] p-1 rounded-xl overflow-x-auto scrollbar-hide">
         {[
+          { id: 'reto', label: 'Reto 90D' },
           { id: 'program', label: 'Programa' },
-          { id: 'today', label: 'Entrenamiento' },
+          { id: 'today', label: 'Entreno' },
           { id: 'nutrition', label: 'Nutrición' },
           { id: 'plans', label: 'Planes' },
         ].map(t => (
@@ -646,6 +647,163 @@ export default function BoostScreen({ initialTab = 'program', sessionActive = fa
             {PROGRAMS.map(p => (
               <ProgramCard key={p.id} program={p} onStart={handleProgramStart} />
             ))}
+          </motion.div>
+        )}
+
+        {activeTab === 'reto' && (
+          <motion.div key="reto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-5">
+            {/* Hero */}
+            <div className="relative rounded-3xl overflow-hidden h-52">
+              <img
+                src="https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Reto Boost"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.92) 100%)' }} />
+              <div className="absolute inset-0 flex flex-col justify-end p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-black uppercase tracking-widest" style={{ background: '#FFD600' }}>
+                    Reto Oficial
+                  </span>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white/10 text-white uppercase tracking-widest">
+                    90 Dias
+                  </span>
+                </div>
+                <h2 className="text-3xl font-black text-white uppercase italic leading-none mb-1">
+                  Boost Challenge
+                </h2>
+                <p className="text-sm text-[#D4D4D8]">Transforma tu cuerpo. Documenta el cambio. Gana.</p>
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Participantes', value: '2.1k' },
+                { label: 'Duración', value: '90 días' },
+                { label: 'Semanas', value: '12 sem' },
+              ].map(s => (
+                <div key={s.label} className="glass-effect rounded-xl p-3 text-center">
+                  <p className="text-lg font-black text-[#FFD600]">{s.value}</p>
+                  <p className="text-[10px] text-[#71717A] font-bold uppercase tracking-wide">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* What is it */}
+            <div className="glass-effect rounded-2xl p-5">
+              <h3 className="font-black text-white mb-3 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-[#FFD600]" /> ¿En qué consiste?
+              </h3>
+              <p className="text-sm text-[#D4D4D8] leading-relaxed">
+                El <span className="text-[#FFD600] font-bold">Boost Challenge</span> es un reto de transformación física de 90 días diseñado por Sergi Constance. Entrena con el programa oficial, registra tu progreso y documenta tu cambio físico semana a semana. Al finalizar, los participantes con mayor transformación compiten por premios exclusivos.
+              </p>
+            </div>
+
+            {/* Phases */}
+            <div className="glass-effect rounded-2xl p-5">
+              <h3 className="font-black text-white mb-4 flex items-center gap-2">
+                <Target className="w-4 h-4 text-[#FFD600]" /> Fases del Reto
+              </h3>
+              <div className="flex flex-col gap-3">
+                {[
+                  {
+                    phase: 'Fase 1',
+                    weeks: 'Sem 1–4',
+                    title: 'Activación',
+                    desc: 'Adapta tu cuerpo al volumen. Consolida la técnica. Base sólida.',
+                    color: '#22d3ee',
+                  },
+                  {
+                    phase: 'Fase 2',
+                    weeks: 'Sem 5–8',
+                    title: 'Hipertrofia',
+                    desc: 'Máximo volumen de entrenamiento. Progresión semana a semana.',
+                    color: '#FFD600',
+                  },
+                  {
+                    phase: 'Fase 3',
+                    weeks: 'Sem 9–12',
+                    title: 'Peak & Definición',
+                    desc: 'Intensidad máxima. Afina la composición. Prepara el físico final.',
+                    color: '#f97316',
+                  },
+                ].map((p, i) => (
+                  <div key={p.phase} className="flex items-start gap-4 p-4 rounded-xl bg-[#111113]">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-black"
+                      style={{ background: `${p.color}18`, color: p.color, border: `1px solid ${p.color}30` }}>
+                      {i + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-black" style={{ color: p.color }}>{p.weeks}</span>
+                        <span className="text-[10px] text-[#71717A] font-bold uppercase tracking-wide">{p.phase}</span>
+                      </div>
+                      <p className="font-bold text-[#F4F4F5] text-sm">{p.title}</p>
+                      <p className="text-xs text-[#71717A] mt-0.5">{p.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rules */}
+            <div className="glass-effect rounded-2xl p-5">
+              <h3 className="font-black text-white mb-4 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-[#FFD600]" /> Reglas del Reto
+              </h3>
+              <div className="flex flex-col gap-2.5">
+                {[
+                  'Foto inicial obligatoria el Día 1 (frente, perfil, espalda)',
+                  'Check-in semanal con foto de progreso cada lunes',
+                  'Mínimo 3 entrenos semanales registrados en la app',
+                  'Foto final en el Día 90 con las mismas poses',
+                  'Dieta alineada al plan de nutrición del programa',
+                  'Compartir al menos 2 posts semanales en la comunidad',
+                ].map((r, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                      style={{ background: 'rgba(255,214,0,0.12)', border: '1px solid rgba(255,214,0,0.3)' }}>
+                      <span className="text-[9px] font-black text-[#FFD600]">{i + 1}</span>
+                    </div>
+                    <p className="text-sm text-[#D4D4D8]">{r}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Prizes */}
+            <div className="glass-effect rounded-2xl p-5">
+              <h3 className="font-black text-white mb-4 flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-[#FFD600]" /> Premios
+              </h3>
+              <div className="flex flex-col gap-3">
+                {[
+                  { pos: '1°', prize: 'Pack Suplementación Anual + Sesión con Sergi', badge: '🥇', color: '#FFD600' },
+                  { pos: '2°', prize: 'Pack Suplementación 6 meses + Merchandising SC', badge: '🥈', color: '#D4D4D8' },
+                  { pos: '3°', prize: 'Pack Suplementación 3 meses', badge: '🥉', color: '#f97316' },
+                  { pos: 'Top 10', prize: 'Camiseta edición limitada Boost Challenge', badge: '🎽', color: '#71717A' },
+                ].map(p => (
+                  <div key={p.pos} className="flex items-center gap-3 p-3 rounded-xl bg-[#111113]">
+                    <span className="text-xl">{p.badge}</span>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wide" style={{ color: p.color }}>{p.pos}</p>
+                      <p className="text-sm text-[#F4F4F5]">{p.prize}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setActiveTab('program')}
+              className="w-full py-4 rounded-2xl text-base font-black uppercase tracking-widest text-black border-none cursor-pointer"
+              style={{ background: 'linear-gradient(135deg, #FFD600, #FFA500)', boxShadow: '0 8px 24px rgba(255,214,0,0.35)' }}
+            >
+              Comenzar el Reto
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
